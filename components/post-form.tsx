@@ -35,7 +35,7 @@ type PostFormValues = z.infer<typeof formSchema>;
 
 interface PostFormProps {
   post?: {
-    id: string;
+    id: number | string;
     title: string;
     content: string;
     author: string;
@@ -58,7 +58,7 @@ export default function PostForm({ post }: PostFormProps) {
     setLoading(true);
     try {
       if (post) {
-        await updatePost(post.id, values);
+        await updatePost(post.id.toString(), values);
         toast.success("Post updated", {
           description: "Your post has been updated.",
         });

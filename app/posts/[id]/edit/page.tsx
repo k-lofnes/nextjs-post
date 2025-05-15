@@ -1,26 +1,26 @@
-import { Suspense } from "react"
-import { notFound } from "next/navigation"
-import type { Metadata } from "next"
-import { getPost } from "@/lib/api"
-import PostForm from "@/components/post-form"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Suspense } from "react";
+import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+import { getPost } from "@/lib/api";
+import { Skeleton } from "@/components/ui/skeleton";
+import PostForm from "@/components/post-form";
 
 export const metadata: Metadata = {
   title: "Edit Post",
   description: "Edit an existing post",
-}
+};
 
-export const dynamic = "force-dynamic"
-export const revalidate = 0
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 async function EditPostForm({ id }: { id: string }) {
-  const post = await getPost(id)
+  const post = await getPost(id);
 
   if (!post) {
-    notFound()
+    notFound();
   }
 
-  return <PostForm post={post} />
+  return <PostForm post={post} />;
 }
 
 function EditPostSkeleton() {
@@ -31,7 +31,7 @@ function EditPostSkeleton() {
       <Skeleton className="h-40 w-full mb-6" />
       <Skeleton className="h-10 w-32" />
     </>
-  )
+  );
 }
 
 export default function EditPostPage({ params }: { params: { id: string } }) {
@@ -42,5 +42,6 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
         <EditPostForm id={params.id} />
       </Suspense>
     </main>
-  )
+  );
 }
+
