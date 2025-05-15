@@ -1,8 +1,6 @@
-import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getPost } from "@/lib/api";
-import { Skeleton } from "@/components/ui/skeleton";
 import PostForm from "@/components/post-form";
 
 export const metadata: Metadata = {
@@ -13,34 +11,22 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-async function EditPostForm({ id }: { id: string }) {
+export default async function EditPostPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
   const post = await getPost(id);
 
   if (!post) {
     notFound();
   }
 
-  return <PostForm post={post} />;
-}
-
-function EditPostSkeleton() {
-  return (
-    <>
-      <Skeleton className="h-10 w-1/3 mb-6" />
-      <Skeleton className="h-12 w-full mb-6" />
-      <Skeleton className="h-40 w-full mb-6" />
-      <Skeleton className="h-10 w-32" />
-    </>
-  );
-}
-
-export default function EditPostPage({ params }: { params: { id: string } }) {
   return (
     <main className="container mx-auto py-8 px-4 max-w-3xl">
       <h1 className="text-3xl font-bold mb-8">Edit Post</h1>
-      <Suspense fallback={<EditPostSkeleton />}>
-        <EditPostForm id={params.id} />
-      </Suspense>
+      <PostForm post={post} />
     </main>
   );
 }

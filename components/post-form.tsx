@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
+import { toast } from "sonner"; // Changed from "@/components/ui/use-toast"
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { createPost, updatePost } from "@/lib/api";
 
@@ -35,7 +35,7 @@ type PostFormValues = z.infer<typeof formSchema>;
 
 interface PostFormProps {
   post?: {
-    id: number | string;
+    id: number;
     title: string;
     content: string;
     author: string;
@@ -44,7 +44,8 @@ interface PostFormProps {
 
 export default function PostForm({ post }: PostFormProps) {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const form = useForm<PostFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -55,28 +56,28 @@ export default function PostForm({ post }: PostFormProps) {
   });
 
   async function onSubmit(values: PostFormValues) {
-    setLoading(true);
+    setIsSubmitting(true);
     try {
       if (post) {
         await updatePost(post.id.toString(), values);
         toast.success("Post updated", {
-          description: "Your post has been updated.",
+          description: "Your post has been updated successfully.",
         });
       } else {
         await createPost(values);
         toast.success("Post created", {
-          description: "Your post has been created.",
+          description: "Your post has been created successfully.",
         });
       }
       router.push("/");
       router.refresh();
     } catch (error) {
-      console.error("Error saving post:", error);
+      console.error("Error submitting form:", error);
       toast.error("Error", {
-        description: "There was an error. Please try again.",
+        description: "There was an error saving your post. Please try again.",
       });
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   }
 
@@ -91,7 +92,7 @@ export default function PostForm({ post }: PostFormProps) {
               <FormItem>
                 <FormLabel>Title</FormLabel>
                 <FormControl>
-                  <Input placeholder="Title" {...field} />
+                  <Input placeholder="Enter post title" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -105,8 +106,8 @@ export default function PostForm({ post }: PostFormProps) {
                 <FormLabel>Content</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="Write your post..."
-                    rows={8}
+                    placeholder="Enter post content"
+                    className="min-h-[200px]"
                     {...field}
                   />
                 </FormControl>
@@ -121,31 +122,25 @@ export default function PostForm({ post }: PostFormProps) {
               <FormItem>
                 <FormLabel>Author</FormLabel>
                 <FormControl>
-                  <Input placeholder="Your name" {...field} />
+                  <Input placeholder="Enter author name" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <div className="flex gap-2">
-            <Button type="submit" disabled={loading}>
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {post ? "Updating..." : "Creating..."}
-                </>
-              ) : post ? (
-                "Update Post"
-              ) : (
-                "Create Post"
-              )}
-            </Button>
-            <Link href="/">
+          <div className="flex justify-between">
+            <Link href={post ? `/posts/${post.id}` : "/"}>
               <Button type="button" variant="outline">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Cancel
               </Button>
             </Link>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              {post ? "Update" : "Create"} Post
+            </Button>
           </div>
         </form>
       </Form>

@@ -1,21 +1,28 @@
-import { Suspense } from "react"
-import Link from "next/link"
-import { notFound } from "next/navigation"
-import { getPost } from "@/lib/api"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
-import { ArrowLeft, Edit } from "lucide-react"
-import DeleteButton from "@/components/delete-button"
+import { Suspense } from "react";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { getPost } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ArrowLeft, Edit } from "lucide-react";
+import DeleteButton from "@/components/delete-button";
 
-export const dynamic = "force-dynamic"
-export const revalidate = 0
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 async function PostContent({ id }: { id: string }) {
-  const post = await getPost(id)
+  const post = await getPost(id);
 
   if (!post) {
-    notFound()
+    notFound();
   }
 
   return (
@@ -49,7 +56,7 @@ async function PostContent({ id }: { id: string }) {
         </div>
       </CardFooter>
     </Card>
-  )
+  );
 }
 
 function PostSkeleton() {
@@ -70,15 +77,21 @@ function PostSkeleton() {
         </div>
       </CardFooter>
     </Card>
-  )
+  );
 }
 
-export default function PostPage({ params }: { params: { id: string } }) {
+export default async function PostPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
   return (
     <main className="container mx-auto py-8 px-4 max-w-3xl">
       <Suspense fallback={<PostSkeleton />}>
-        <PostContent id={params.id} />
+        <PostContent id={id} />
       </Suspense>
     </main>
-  )
+  );
 }
+

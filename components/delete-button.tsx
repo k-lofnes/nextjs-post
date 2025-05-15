@@ -16,35 +16,39 @@ import {
 import { Button } from "@/components/ui/button";
 import { Loader2, Trash } from "lucide-react";
 import { deletePost } from "@/lib/api";
-import { toast as sonner } from "sonner";
+import { toast } from "sonner";
 
 interface DeleteButtonProps {
   id: string;
+  postTitle?: string;
 }
 
-export default function DeleteButton({ id }: DeleteButtonProps) {
+export default function DeleteButton({ id, postTitle }: DeleteButtonProps) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
   const [open, setOpen] = useState(false);
 
   async function handleDelete() {
     setIsDeleting(true);
-    try {
-      await deletePost(id);
-      sonner.success("Post deleted", {
-        description: "Your post has been deleted successfully.",
-      });
-      router.push("/");
-      router.refresh();
-    } catch (error) {
-      console.error("Error deleting post:", error);
-      sonner.error("Error", {
-        description: "There was an error deleting your post. Please try again.",
-      });
-    } finally {
-      setIsDeleting(false);
-      setOpen(false);
-    }
+
+    toast.promise(
+      deletePost(id)
+        .then(() => {
+          router.push("/");
+          router.refresh();
+          setOpen(false);
+        })
+        .finally(() => {
+          setIsDeleting(false);
+        }),
+      {
+        loading: "Deleting post...",
+        success: postTitle
+          ? `"${postTitle}" has been deleted successfully.`
+          : "Your post has been deleted successfully.",
+        error: "There was an error deleting your post. Please try again.",
+      }
+    );
   }
 
   return (
@@ -59,8 +63,8 @@ export default function DeleteButton({ id }: DeleteButtonProps) {
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete your
-            post.
+            This action cannot be undone. This will permanently delete
+            {postTitle ? ` "${postTitle}"` : " your post"}.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
