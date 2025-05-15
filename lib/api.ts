@@ -1,7 +1,4 @@
-// Update this URL with your deployed Nest.js API URL
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  "https://nestjs-posts-git-main-klofnes-projects.vercel.app";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export interface Post {
   id: number;
