@@ -71,6 +71,7 @@ export default function PostForm({ post }: PostFormProps) {
       router.push("/");
       router.refresh();
     } catch (error) {
+      console.error("Error saving post:", error);
       toast.error("Error", {
         description: "There was an error. Please try again.",
       });

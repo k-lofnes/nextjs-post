@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PlusCircle, ChevronsUpDown, Cross, Plus } from "lucide-react";
+import { PlusCircle, ChevronsUpDown, Plus } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
