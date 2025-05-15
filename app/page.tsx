@@ -37,7 +37,7 @@ async function PostsList() {
               By {post.author} • {new Date(post.createdAt).toLocaleDateString()}
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex-grow">
+          <CardContent className="grow">
             <p className="line-clamp-3">{post.content}</p>
           </CardContent>
           <CardFooter className="flex justify-between">
@@ -63,7 +63,7 @@ function PostsListSkeleton() {
             <Skeleton className="h-8 w-full" />
             <Skeleton className="h-4 w-24 mt-2" />
           </CardHeader>
-          <CardContent className="flex-grow">
+          <CardContent className="grow">
             <Skeleton className="h-20 w-full" />
           </CardContent>
           <CardFooter className="flex justify-between">
