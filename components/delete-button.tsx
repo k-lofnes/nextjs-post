@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,41 +12,38 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
-import { toast } from "@/components/ui/use-toast"
-import { Loader2, Trash } from "lucide-react"
-import { deletePost } from "@/lib/api"
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Loader2, Trash } from "lucide-react";
+import { deletePost } from "@/lib/api";
+import { toast as sonner } from "sonner";
 
 interface DeleteButtonProps {
-  id: string
+  id: string;
 }
 
 export default function DeleteButton({ id }: DeleteButtonProps) {
-  const router = useRouter()
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [open, setOpen] = useState(false)
+  const router = useRouter();
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [open, setOpen] = useState(false);
 
   async function handleDelete() {
-    setIsDeleting(true)
+    setIsDeleting(true);
     try {
-      await deletePost(id)
-      toast({
-        title: "Post deleted",
+      await deletePost(id);
+      sonner.success("Post deleted", {
         description: "Your post has been deleted successfully.",
-      })
-      router.push("/")
-      router.refresh()
+      });
+      router.push("/");
+      router.refresh();
     } catch (error) {
-      console.error("Error deleting post:", error)
-      toast({
-        title: "Error",
+      console.error("Error deleting post:", error);
+      sonner.error("Error", {
         description: "There was an error deleting your post. Please try again.",
-        variant: "destructive",
-      })
+      });
     } finally {
-      setIsDeleting(false)
-      setOpen(false)
+      setIsDeleting(false);
+      setOpen(false);
     }
   }
 
@@ -62,15 +59,16 @@ export default function DeleteButton({ id }: DeleteButtonProps) {
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete your post.
+            This action cannot be undone. This will permanently delete your
+            post.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={(e) => {
-              e.preventDefault()
-              handleDelete()
+              e.preventDefault();
+              handleDelete();
             }}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             disabled={isDeleting}
@@ -87,5 +85,6 @@ export default function DeleteButton({ id }: DeleteButtonProps) {
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  )
+  );
 }
+
