@@ -1,10 +1,10 @@
-import type { Metadata } from "next"
-import PostForm from "@/components/post-form"
+import PostForm from "@/components/post-form";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Create Post",
   description: "Create a new post",
-}
+};
 
 export default function CreatePostPage() {
   return (
@@ -12,5 +12,6 @@ export default function CreatePostPage() {
       <h1 className="text-3xl font-bold mb-8">Create Post</h1>
       <PostForm />
     </main>
-  )
+  );
 }
+

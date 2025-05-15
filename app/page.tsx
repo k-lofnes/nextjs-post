@@ -1,16 +1,23 @@
-import { Suspense } from "react"
-import Link from "next/link"
-import { getPosts } from "@/lib/api"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
-import { PlusCircle } from "lucide-react"
+import { Suspense } from "react";
+import Link from "next/link";
+import { getPosts } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { PlusCircle, ChevronsUpDown, Cross, Plus } from "lucide-react";
 
-export const dynamic = "force-dynamic"
-export const revalidate = 0
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 async function PostsList() {
-  const posts = await getPosts()
+  const posts = await getPosts();
 
   if (!posts || posts.length === 0) {
     return (
@@ -20,11 +27,10 @@ async function PostsList() {
         <Link href="/posts/create">
           <Button>
             <PlusCircle className="mr-2 h-4 w-4" />
-            Create Post
           </Button>
         </Link>
       </div>
-    )
+    );
   }
 
   return (
@@ -51,7 +57,7 @@ async function PostsList() {
         </Card>
       ))}
     </div>
-  )
+  );
 }
 
 function PostsListSkeleton() {
@@ -73,7 +79,7 @@ function PostsListSkeleton() {
         </Card>
       ))}
     </div>
-  )
+  );
 }
 
 export default function Home() {
@@ -81,16 +87,21 @@ export default function Home() {
     <main className="container mx-auto py-8 px-4">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Posts</h1>
-        <Link href="/posts/create">
+        <div>
           <Button>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Create Post
+            <ChevronsUpDown className="size-5 text-[#110B39] font-bold m-0 p-0" />
           </Button>
-        </Link>
+          <Link href="/posts/create">
+            <Button>
+              <Plus className="size-5" />
+            </Button>
+          </Link>
+        </div>
       </div>
       <Suspense fallback={<PostsListSkeleton />}>
         <PostsList />
       </Suspense>
     </main>
-  )
+  );
 }
+

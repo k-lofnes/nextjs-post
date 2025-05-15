@@ -1,41 +1,50 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { toast } from "@/components/ui/use-toast"
-import { ArrowLeft, Loader2 } from "lucide-react"
-import { createPost, updatePost } from "@/lib/api"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { createPost, updatePost } from "@/lib/api";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required").max(255, "Title is too long"),
   content: z.string().min(1, "Content is required"),
-  author: z.string().min(1, "Author is required").max(100, "Author name is too long"),
-})
+  author: z
+    .string()
+    .min(1, "Author is required")
+    .max(100, "Author name is too long"),
+});
 
-type PostFormValues = z.infer<typeof formSchema>
+type PostFormValues = z.infer<typeof formSchema>;
 
 interface PostFormProps {
   post?: {
-    id: number
-    title: string
-    content: string
-    author: string
-  }
+    id: string;
+    title: string;
+    content: string;
+    author: string;
+  };
 }
 
 export default function PostForm({ post }: PostFormProps) {
-  const router = useRouter()
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const form = useForm<PostFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -43,35 +52,30 @@ export default function PostForm({ post }: PostFormProps) {
       content: post?.content || "",
       author: post?.author || "",
     },
-  })
+  });
 
   async function onSubmit(values: PostFormValues) {
-    setIsSubmitting(true)
+    setLoading(true);
     try {
       if (post) {
-        await updatePost(post.id.toString(), values)
-        toast({
-          title: "Post updated",
-          description: "Your post has been updated successfully.",
-        })
+        await updatePost(post.id, values);
+        toast.success("Post updated", {
+          description: "Your post has been updated.",
+        });
       } else {
-        await createPost(values)
-        toast({
-          title: "Post created",
-          description: "Your post has been created successfully.",
-        })
+        await createPost(values);
+        toast.success("Post created", {
+          description: "Your post has been created.",
+        });
       }
-      router.push("/")
-      router.refresh()
+      router.push("/");
+      router.refresh();
     } catch (error) {
-      console.error("Error submitting form:", error)
-      toast({
-        title: "Error",
-        description: "There was an error saving your post. Please try again.",
-        variant: "destructive",
-      })
+      toast.error("Error", {
+        description: "There was an error. Please try again.",
+      });
     } finally {
-      setIsSubmitting(false)
+      setLoading(false);
     }
   }
 
@@ -86,7 +90,7 @@ export default function PostForm({ post }: PostFormProps) {
               <FormItem>
                 <FormLabel>Title</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter post title" {...field} />
+                  <Input placeholder="Title" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -99,7 +103,11 @@ export default function PostForm({ post }: PostFormProps) {
               <FormItem>
                 <FormLabel>Content</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="Enter post content" className="min-h-[200px]" {...field} />
+                  <Textarea
+                    placeholder="Write your post..."
+                    rows={8}
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -112,26 +120,34 @@ export default function PostForm({ post }: PostFormProps) {
               <FormItem>
                 <FormLabel>Author</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter author name" {...field} />
+                  <Input placeholder="Your name" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <div className="flex justify-between">
-            <Link href={post ? `/posts/${post.id}` : "/"}>
+          <div className="flex gap-2">
+            <Button type="submit" disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {post ? "Updating..." : "Creating..."}
+                </>
+              ) : post ? (
+                "Update Post"
+              ) : (
+                "Create Post"
+              )}
+            </Button>
+            <Link href="/">
               <Button type="button" variant="outline">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Cancel
               </Button>
             </Link>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {post ? "Update" : "Create"} Post
-            </Button>
           </div>
         </form>
       </Form>
     </Card>
-  )
+  );
 }
