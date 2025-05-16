@@ -2,7 +2,7 @@ import type React from "react";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "@/components/ui/sonner";
+import { NotificationProvider } from "@/components/ui/notification-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,8 +20,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <div className="min-h-screen">{children}</div>
-        <Toaster />
+        <NotificationProvider>
+          <div className="min-h-screen">{children}</div>
+        </NotificationProvider>
       </body>
     </html>
   );

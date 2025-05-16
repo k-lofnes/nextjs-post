@@ -28,13 +28,42 @@ async function PostContent({ id }: { id: string }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-2xl">{post.title}</CardTitle>
-        <CardDescription>
-          By {post.author} • {new Date(post.createdAt).toLocaleDateString()}
+        <CardTitle className="text-2xl leading-6 font-semibold">
+          {post.title}
+        </CardTitle>
+        <CardDescription className="text-[16px] leading-4">
+          <span className="text-[#6B7280]">
+            {" "}
+            {new Date(post.createdAt).toLocaleDateString("no-NB", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "2-digit",
+            })}{" "}
+            (
+            {new Date(post.createdAt).toLocaleTimeString("no-NB", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+            ){" "}
+          </span>
+          <span className="text-[#4F46E5]">
+            Edited:{" "}
+            {new Date(post.updatedAt).toLocaleDateString("no-NB", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "2-digit",
+            })}{" "}
+            (
+            {new Date(post.updatedAt).toLocaleTimeString("no-NB", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+            )
+          </span>
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="prose max-w-none dark:prose-invert">
+        <div className="max-w-none">
           <p className="whitespace-pre-line">{post.content}</p>
         </div>
       </CardContent>

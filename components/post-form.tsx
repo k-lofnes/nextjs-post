@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner"; // Changed from "@/components/ui/use-toast"
+import { useNotification } from "@/components/ui/notification-provider";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { createPost, updatePost } from "@/lib/api";
 
@@ -45,6 +45,7 @@ interface PostFormProps {
 export default function PostForm({ post }: PostFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { notify } = useNotification();
 
   const form = useForm<PostFormValues>({
     resolver: zodResolver(formSchema),
@@ -60,21 +61,23 @@ export default function PostForm({ post }: PostFormProps) {
     try {
       if (post) {
         await updatePost(post.id.toString(), values);
-        toast.success("Post updated", {
-          description: "Your post has been updated successfully.",
+        notify({
+          title: "Post updated",
+          description: "Your post has been updated.",
         });
       } else {
         await createPost(values);
-        toast.success("Post created", {
-          description: "Your post has been created successfully.",
+        notify({
+          title: "Post created",
+          description: "Your post has been created.",
         });
       }
       router.push("/");
       router.refresh();
     } catch (error) {
-      console.error("Error submitting form:", error);
-      toast.error("Error", {
-        description: "There was an error saving your post. Please try again.",
+      notify({
+        title: "Error",
+        description: "There was an error. Please try again.",
       });
     } finally {
       setIsSubmitting(false);
