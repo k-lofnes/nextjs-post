@@ -1,6 +1,6 @@
 "use client"; // Make this a client component
 
-import { Suspense, useState, useEffect } from "react"; // Added useState, useEffect
+import { useState, useEffect, useCallback } from "react"; // Added useState, useEffect, useCallback // Removed Suspense
 // Link is not directly used for modal triggers anymore from here, but PostForm might use it.
 import { getPosts, type Post } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -16,14 +16,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input"; // Added Input
 import {
   Plus,
-  MoreVertical, // Removed MoreHorizontal
+  MoreVertical,
   ChevronsUpDown,
-  ArrowDownUp, // Added for sort icon
   X,
   Search,
-  Pencil, // Added for close icon in drawer
-  // Search, // Optionally add Search icon if needed later
-} from "lucide-react"; // Removed PlusCircle
+  Pencil,
+} from "lucide-react"; // Corrected lucide-react imports
 import DeleteButton from "@/components/delete-button";
 import CreatePostModal from "@/components/modals/CreatePostModal";
 import EditPostModal from "@/components/modals/EditPostModal";
@@ -209,7 +207,8 @@ export default function Home() {
 
   const isMobile = useIsMobile();
 
-  const fetchAndSetPosts = async () => {
+  const fetchAndSetPosts = useCallback(async () => {
+    // Wrapped in useCallback
     setIsLoadingPosts(true);
     try {
       let fetchedPosts = await getPosts();
@@ -252,11 +251,11 @@ export default function Home() {
       setPosts([]); // Set to empty array on error
     }
     setIsLoadingPosts(false);
-  };
+  }, [searchTerm, sortOrder]); // Added dependencies for useCallback
 
   useEffect(() => {
     fetchAndSetPosts();
-  }, [searchTerm, sortOrder]); // Re-fetch when searchTerm or sortOrder changes
+  }, [fetchAndSetPosts]); // Now useEffect depends on the memoized fetchAndSetPosts
 
   const handleSortChange = (newSortOrder: string) => {
     setSortOrder(newSortOrder);

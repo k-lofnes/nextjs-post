@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react"; // Removed useTransition
+// Removed useRouter
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Loader2, Trash } from "lucide-react";
 import { deletePost } from "@/lib/api";
@@ -38,11 +38,11 @@ export default function DeleteButton({
   isMenuItem,
   onDeleteSuccess,
 }: DeleteButtonProps) {
-  const router = useRouter();
+  // const router = useRouter(); // Removed unused router
   const [isDeleting, setIsDeleting] = useState(false);
   const [open, setOpen] = useState(false);
   const isMobile = useIsMobile();
-  const [isPending, startTransition] = useTransition();
+  // const [isPending, startTransition] = useTransition(); // Removed unused useTransition
 
   async function handleDelete() {
     setIsDeleting(true);
