@@ -20,6 +20,10 @@ export default function EditPostModal({
 }: EditPostModalProps) {
   const isMobile = useIsMobile();
 
+  const handleFormSubmitSuccess = () => {
+    onOpenChange(false); // Close the modal
+  };
+
   useEffect(() => {
     // Client-side effects can go here
   }, [isOpen]); // Re-run if isOpen changes
@@ -36,7 +40,7 @@ export default function EditPostModal({
           <DrawerTitle className="text-2xl font-bold mb-6 text-center">
             Edit Post
           </DrawerTitle>
-          <PostForm post={post} />
+          <PostForm post={post} onFormSubmitSuccess={handleFormSubmitSuccess} />
         </DrawerContent>
       </Drawer>
     );
@@ -46,7 +50,7 @@ export default function EditPostModal({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="container mx-auto py-8 px-4 max-w-3xl">
         <DialogTitle className="text-3xl font-bold mb-8">Edit Post</DialogTitle>
-        <PostForm post={post} />
+        <PostForm post={post} onFormSubmitSuccess={handleFormSubmitSuccess} />
       </DialogContent>
     </Dialog>
   );
