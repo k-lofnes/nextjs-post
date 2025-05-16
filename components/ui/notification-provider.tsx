@@ -1,9 +1,29 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Drawer } from "@/components/ui/drawer";
-import { Dialog, DialogContent } from "./dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerFooter,
+} from "@/components/ui/drawer";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "./dialog";
+import { Button } from "@/components/ui/button";
 
 interface Notification {
   id: number;
@@ -27,6 +47,22 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const [current, setCurrent] = useState<Notification | null>(null);
   const isMobile = useIsMobile();
 
+  useEffect(() => {
+    let timerId: NodeJS.Timeout;
+    if (!open && current) {
+      // If the dialog/drawer was open and is now closed,
+      // and there was a current notification being displayed.
+      timerId = setTimeout(() => {
+        setNotifications((prev) => prev.slice(1)); // Original logic to remove oldest
+        setCurrent(null);
+        // If you wanted to show the next notification in a queue,
+        // you would add logic here to check the notifications array
+        // and call setCurrent and setOpen(true) for the next one.
+      }, 300); // Corresponds to animation duration
+    }
+    return () => clearTimeout(timerId);
+  }, [open, current, setNotifications]);
+
   const notify = (notification: Omit<Notification, "id">) => {
     notificationId += 1;
     const newNotification = { ...notification, id: notificationId };
@@ -35,12 +71,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     setOpen(true);
   };
 
-  const handleClose = () => {
-    setOpen(false);
-    setTimeout(() => {
-      setNotifications((prev) => prev.slice(1));
-      setCurrent(null);
-    }, 300);
+  // Renamed from handleClose, this function is for explicit close actions like a button click.
+  const triggerClose = () => {
+    setOpen(false); // This will trigger the useEffect above to handle cleanup.
   };
 
   return (
@@ -48,22 +81,33 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       {children}
       {current && isMobile ? (
         <Drawer open={open} onOpenChange={setOpen}>
-          <div className="p-4">
-            <div className="font-bold text-lg mb-2">{current.title}</div>
-            {current.description && <div>{current.description}</div>}
-            <button
-              className="mt-4 w-full btn btn-primary"
-              onClick={handleClose}
-            >
-              Close
-            </button>
-          </div>
+          <DrawerContent>
+            <DrawerHeader className="text-left">
+              <DrawerTitle>{current.title}</DrawerTitle>
+              {current.description && (
+                <DrawerDescription>{current.description}</DrawerDescription>
+              )}
+            </DrawerHeader>
+            <DrawerFooter>
+              <Button onClick={triggerClose} className="w-full">
+                Close
+              </Button>
+            </DrawerFooter>
+          </DrawerContent>
         </Drawer>
       ) : current ? (
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogContent>
-            <div className="font-bold text-lg mb-2">{current.title}</div>
-            {current.description && <div>{current.description}</div>}
+            <DialogHeader className="text-left sm:text-center">
+              {" "}
+              {/* Adjusted alignment for dialog */}
+              <DialogTitle>{current.title}</DialogTitle>
+              {current.description && (
+                <DialogDescription>{current.description}</DialogDescription>
+              )}
+            </DialogHeader>
+            {/* Dialogs often rely on Escape key or overlay click for closing.
+                An explicit close button can be added in DialogFooter if desired. */}
           </DialogContent>
         </Dialog>
       ) : null}

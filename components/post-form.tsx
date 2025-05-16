@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,9 +18,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useNotification } from "@/components/ui/notification-provider";
+import { toast } from "sonner";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { createPost, updatePost } from "@/lib/api";
+import CustomInputField from "./custom-input-field";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required").max(255, "Title is too long"),
@@ -40,12 +41,13 @@ interface PostFormProps {
     content: string;
     author: string;
   };
+  onFormSubmitSuccess?: () => void; // Add callback prop
 }
 
-export default function PostForm({ post }: PostFormProps) {
+export default function PostForm({ post, onFormSubmitSuccess }: PostFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { notify } = useNotification();
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<PostFormValues>({
     resolver: zodResolver(formSchema),
@@ -54,99 +56,112 @@ export default function PostForm({ post }: PostFormProps) {
       content: post?.content || "",
       author: post?.author || "",
     },
+    mode: "onChange", // Validate on change to update isValid status promptly
   });
 
   async function onSubmit(values: PostFormValues) {
     setIsSubmitting(true);
-    try {
-      if (post) {
-        await updatePost(post.id.toString(), values);
-        notify({
-          title: "Post updated",
-          description: "Your post has been updated.",
-        });
-      } else {
-        await createPost(values);
-        notify({
-          title: "Post created",
-          description: "Your post has been created.",
-        });
+    startTransition(async () => {
+      try {
+        if (post) {
+          await updatePost(post.id.toString(), values);
+          toast.success("Post updated successfully!");
+          if (onFormSubmitSuccess) {
+            onFormSubmitSuccess();
+          } else {
+            router.push("/");
+            router.refresh();
+          }
+        } else {
+          await createPost(values);
+          toast.success("Post created successfully!");
+          if (onFormSubmitSuccess) {
+            onFormSubmitSuccess();
+          } else {
+            router.push("/");
+            router.refresh();
+          }
+        }
+      } catch (error) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error("An unexpected error occurred.");
+        }
+      } finally {
+        setIsSubmitting(false); // Ensure isSubmitting is reset
       }
-      router.push("/");
-      router.refresh();
-    } catch {
-      notify({
-        title: "Error",
-        description: "There was an error. Please try again.",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    });
   }
 
   return (
-    <Card className="p-6">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Title</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter post title" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="content"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Content</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Enter post content"
-                    className="min-h-[200px]"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="author"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Author</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter author name" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div className="flex justify-between">
-            <Link href={post ? `/posts/${post.id}` : "/"}>
-              <Button type="button" variant="outline">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Cancel
-              </Button>
-            </Link>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
-              {post ? "Update" : "Create"} Post
-            </Button>
-          </div>
-        </form>
-      </Form>
-    </Card>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="title"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <CustomInputField
+                  autoFocus
+                  title="Title"
+                  placeholder="Enter post title"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="author" // Added author field
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <CustomInputField
+                  title="Author"
+                  placeholder="Enter author's name"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="content"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Textarea
+                  placeholder="Enter post content"
+                  className="min-h-[200px]"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="flex">
+          <Button
+            className="rounded-full w-full"
+            type="submit"
+            disabled={
+              isSubmitting ||
+              !form.formState.isValid || // Use form's overall validity
+              (post && !form.formState.isDirty) // Keep this for update mode
+            }
+          >
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {post ? "Update" : "Create"} Post
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }
