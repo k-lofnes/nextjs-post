@@ -74,7 +74,7 @@ export default function PostForm({ post }: PostFormProps) {
       }
       router.push("/");
       router.refresh();
-    } catch (error) {
+    } catch {
       notify({
         title: "Error",
         description: "There was an error. Please try again.",

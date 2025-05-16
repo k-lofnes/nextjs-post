@@ -48,7 +48,7 @@ export default function DeleteButton({ id, postTitle }: DeleteButtonProps) {
           ? `"${postTitle}" has been deleted successfully.`
           : "Your post has been deleted successfully.",
       });
-    } catch (error) {
+    } catch {
       notify({
         title: "Error deleting post",
         description: "There was an error deleting your post. Please try again.",
